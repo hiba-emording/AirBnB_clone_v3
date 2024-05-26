@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-
+""" a Flask application for an API server """
 from flask import Flask
 from models import storage
 from api.v1.views import app_views
