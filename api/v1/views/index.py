@@ -11,6 +11,7 @@ def get_status():
     """Endpoint to get the status of the API"""
     return jsonify({"status": "OK"})
 
+
 @app_views.route('/stats', methods=['GET'])
 def get_stats():
     """Endpoint to get number of each obj by type"""
