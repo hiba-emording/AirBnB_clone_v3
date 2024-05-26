@@ -14,10 +14,12 @@ from models.place import Place
 from models.review import Review
 from models.state import State
 from models.user import User
+from models import storage
 import json
 import os
 import pep8
 import unittest
+
 DBStorage = db_storage.DBStorage
 classes = {"Amenity": Amenity, "City": City, "Place": Place,
            "Review": Review, "State": State, "User": User}
@@ -86,3 +88,75 @@ class TestFileStorage(unittest.TestCase):
     @unittest.skipIf(models.storage_t != 'db', "not testing db storage")
     def test_save(self):
         """Test that save properly saves objects to file.json"""
+
+    def setUp(self):
+        """Set up test environment"""
+        self.state = State(name="California")
+        storage.new(self.state)
+        storage.save()
+        self.city = City(state_id=self.state.id, name="San Francisco")
+        storage.new(self.city)
+        storage.save()
+
+    def tearDown(self):
+        """Tear down test environment"""
+        storage.delete(self.city)
+        storage.delete(self.state)
+        storage.save()
+
+    def test_get_state(self):
+        """Test get() method for State"""
+        state_id = self.state.id
+        fetched_state = storage.get(State, state_id)
+        self.assertIsNotNone(fetched_state)
+        self.assertEqual(fetched_state.id, state_id)
+        self.assertEqual(fetched_state.name, "California")
+
+    def test_get_city(self):
+        """Test get() method for City"""
+        city_id = self.city.id
+        fetched_city = storage.get(City, city_id)
+        self.assertIsNotNone(fetched_city)
+        self.assertEqual(fetched_city.id, city_id)
+        self.assertEqual(fetched_city.name, "San Francisco")
+
+    def test_count_all(self):
+        """Test count() method for all objects"""
+        initial_count = storage.count()
+        self.assertGreaterEqual(initial_count, 2)
+
+    def test_count_state(self):
+        """Test count() method for State objects"""
+        state_count = storage.count(State)
+        self.assertGreaterEqual(state_count, 1)
+
+    def test_count_city(self):
+        """Test count() method for City objects"""
+        city_count = storage.count(City)
+        self.assertGreaterEqual(city_count, 1)
+
+    def test_get_db(self):
+        """Tests method for obtaining an instance from db storage"""
+        dic = {"name": "Cundinamarca"}
+        instance = State(**dic)
+        storage.new(instance)
+        storage.save()
+        get_instance = storage.get(State, instance.id)
+        self.assertIsNotNone(get_instance)
+        self.assertEqual(get_instance, instance)
+
+    def test_count(self):
+        """Tests count method for db storage"""
+        dic = {"name": "Vecindad"}
+        state = State(**dic)
+        storage.new(state)
+        storage.save()
+        dic = {"name": "Mexico", "state_id": state.id}
+        city = City(**dic)
+        storage.new(city)
+        storage.save()
+        c = storage.count()
+        self.assertEqual(len(storage.all()), c)
+
+if __name__ == '__main__':
+    unittest.main()
