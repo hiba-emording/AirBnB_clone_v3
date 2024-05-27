@@ -25,7 +25,6 @@ class User(BaseModel, Base):
         first_name = ""
         last_name = ""
 
-
     def __init__(self, *args, **kwargs):
         """initializes user"""
         if kwargs.get('password'):
@@ -34,12 +33,10 @@ class User(BaseModel, Base):
             ).hexdigest()
         super().__init__(*args, **kwargs)
 
-
     def update_password(self, new_password):
         """Updates the user's password and hashes it"""
         self.password = hashlib.md5(new_password.encode()).hexdigest()
         self.save()
-
 
     def to_dict(self, save_to_disk=False):
         """Returns a dictionary containing all keys/values of the instance"""
