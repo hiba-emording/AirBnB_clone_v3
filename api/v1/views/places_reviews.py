@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 """View for Review objects that handles default RESTful API actions"""
 
-from flask import jsonify, request, abort
+from flask import jsonify, request, abort, make_response
 from api.v1.views import app_views
 from models import storage
 from models.review import Review
@@ -45,15 +45,15 @@ def create_review(place_id):
     if not place:
         abort(404)
     if not request.is_json:
-        abort(400, description="Not a JSON")
+        return make_response(jsonify(error="Not a JSON"), 400)
     data = request.get_json()
     if 'user_id' not in data:
-        abort(400, description="Missing user_id")
-    user_id = data.get('user_id')
-    if not storage.get(User, user_id):
+        return make_response(jsonify(error="Missing user_id"), 400)
+    user = storage.get(User, data['user_id'])
+    if not user:
         abort(404)
     if 'text' not in data:
-        abort(400, description="Missing text")
+        return make_response(jsonify(error="Missing text"), 400)
     data['place_id'] = place_id
     new_review = Review(**data)
     storage.new(new_review)
@@ -68,7 +68,7 @@ def update_review(review_id):
     if not review:
         abort(404)
     if not request.is_json:
-        abort(400, description="Not a JSON")
+        return make_response(jsonify(error="Not a JSON"), 400)
     data = request.get_json()
     ignore_keys = ['id', 'user_id', 'place_id', 'created_at', 'updated_at']
     for key, value in data.items():
