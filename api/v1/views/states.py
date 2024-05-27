@@ -57,7 +57,7 @@ def update_state(state_id):
     if not request.is_json:
         return make_response(jsonify({"error": "Not a JSON"}), 400)
     data = request.get_json()
-    ignore_keys = ['id', 'created_at', 'updated_at']
+    ignore_keys = ['id', 'created_at']
     for key, value in data.items():
         if key not in ignore_keys:
             setattr(state, key, value)
