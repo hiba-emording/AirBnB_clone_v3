@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 """View for User objects that handles default RESTful API actions"""
 
-from flask import jsonify, request, abort
+from flask import jsonify, request, abort, make_response
 from api.v1.views import app_views
 from models import storage
 from models.user import User
@@ -38,12 +38,12 @@ def delete_user(user_id):
 def create_user():
     """Creates a User"""
     if not request.is_json:
-        abort(400, description="Not a JSON")
+        return make_response(jsonify(error="Not a JSON"), 400)
     data = request.get_json()
     if 'email' not in data:
-        abort(400, description="Missing email")
+        return make_response(jsonify(error="Missing email"), 400)
     if 'password' not in data:
-        abort(400, description="Missing password")
+        return make_response(jsonify(error="Missing password"), 400)
     new_user = User(**data)
     storage.new(new_user)
     storage.save()
@@ -57,7 +57,7 @@ def update_user(user_id):
     if not user:
         abort(404)
     if not request.is_json:
-        abort(400, description="Not a JSON")
+        return make_response(jsonify(error="Not a JSON"), 400)
     data = request.get_json()
     ignore_keys = ['id', 'email', 'created_at', 'updated_at']
     for key, value in data.items():

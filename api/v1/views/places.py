@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 """View for Place objects that handles default RESTful API actions"""
 
-from flask import jsonify, request, abort
+from flask import jsonify, request, abort, make_response
 from api.v1.views import app_views
 from models import storage
 from models.place import Place
@@ -46,15 +46,15 @@ def create_place(city_id):
     if not city:
         abort(404)
     if not request.is_json:
-        abort(400, description="Not a JSON")
+        return make_response(jsonify(error="Not a JSON"), 400)
     data = request.get_json()
     if 'user_id' not in data:
-        abort(400, description="Missing user_id")
+        return make_response(jsonify(error="Missing user_id"), 400)
     user = storage.get(User, data['user_id'])
     if not user:
         abort(404)
     if 'name' not in data:
-        abort(400, description="Missing name")
+        return make_response(jsonify(error="Missing name"), 400)
     data['city_id'] = city_id
     new_place = Place(**data)
     storage.new(new_place)
@@ -69,7 +69,7 @@ def update_place(place_id):
     if not place:
         abort(404)
     if not request.is_json:
-        abort(400, description="Not a JSON")
+        return make_response(jsonify(error="Not a JSON"), 400)
     data = request.get_json()
     ignore_keys = ['id', 'user_id', 'city_id', 'created_at', 'updated_at']
     for key, value in data.items():
