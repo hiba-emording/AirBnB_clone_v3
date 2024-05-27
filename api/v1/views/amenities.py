@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 """View for Amenity objects that handles default RESTful API actions"""
 
-from flask import jsonify, request, abort
+from flask import jsonify, request, abort, make_response
 from api.v1.views import app_views
 from models import storage
 from models.amenity import Amenity
@@ -16,7 +16,7 @@ def get_amenities():
 
 @app_views.route('/amenities/<amenity_id>', methods=['GET'])
 def get_amenity(amenity_id):
-    """Retrieves a Amenity object"""
+    """Retrieves an Amenity object"""
     amenity = storage.get(Amenity, amenity_id)
     if not amenity:
         abort(404)
@@ -25,7 +25,7 @@ def get_amenity(amenity_id):
 
 @app_views.route('/amenities/<amenity_id>', methods=['DELETE'])
 def delete_amenity(amenity_id):
-    """Deletes a Amenity object"""
+    """Deletes an Amenity object"""
     amenity = storage.get(Amenity, amenity_id)
     if not amenity:
         abort(404)
@@ -36,12 +36,12 @@ def delete_amenity(amenity_id):
 
 @app_views.route('/amenities', methods=['POST'])
 def create_amenity():
-    """Creates a Amenity"""
+    """Creates an Amenity"""
     if not request.is_json:
-        abort(400, description="Not a JSON")
+        return make_response(jsonify(error="Not a JSON"), 400)
     data = request.get_json()
     if 'name' not in data:
-        abort(400, description="Missing name")
+        return make_response(jsonify(error="Missing name"), 400)
     new_amenity = Amenity(**data)
     storage.new(new_amenity)
     storage.save()
@@ -50,12 +50,12 @@ def create_amenity():
 
 @app_views.route('/amenities/<amenity_id>', methods=['PUT'])
 def update_amenity(amenity_id):
-    """Updates a Amenity object"""
+    """Updates an Amenity object"""
     amenity = storage.get(Amenity, amenity_id)
     if not amenity:
         abort(404)
     if not request.is_json:
-        abort(400, description="Not a JSON")
+        return make_response(jsonify(error="Not a JSON"), 400)
     data = request.get_json()
     ignore_keys = ['id', 'created_at', 'updated_at']
     for key, value in data.items():
